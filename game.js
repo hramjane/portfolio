@@ -3,9 +3,13 @@ class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.touchState = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false };
         
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
+        window.addEventListener('orientationchange', () => setTimeout(() => this.resizeCanvas(), 100));
+        window.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
         
         // Game state
         this.score = 0;
@@ -44,6 +48,7 @@ class Game {
         this.keys = {};
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
         window.addEventListener('keyup', (e) => this.handleKeyUp(e));
+        this.setupTouchControls();
         
         this.spawnStars();
         this.spawnAsteroids();
@@ -51,20 +56,76 @@ class Game {
     }
     
     resizeCanvas() {
-        this.canvas.width = Math.min(800, window.innerWidth - 40);
-        this.canvas.height = 600;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const availableWidth = Math.max(280, viewportWidth - 24);
+        const availableHeight = Math.max(320, viewportHeight - 260);
+        const targetAspect = 4 / 3;
+        let width = availableWidth;
+        let height = Math.floor(width / targetAspect);
+
+        if (height > availableHeight) {
+            height = availableHeight;
+            width = Math.floor(height * targetAspect);
+        }
+
+        width = Math.min(width, 800);
+        height = Math.min(height, 600);
+
+        this.canvas.width = width;
+        this.canvas.height = height;
+
+        if (this.player) {
+            this.player.x = Math.min(this.player.x, this.canvas.width - 20);
+            this.player.y = Math.min(this.player.y, this.canvas.height - 20);
+        }
+    }
+
+    setupTouchControls() {
+        document.querySelectorAll('.touch-btn').forEach(button => {
+            const key = button.dataset.key;
+            const press = (event) => {
+                event.preventDefault();
+                button.classList.add('active');
+                this.keys[key] = true;
+                if (key === 'Space') {
+                    this.paused = !this.paused;
+                }
+            };
+
+            const release = (event) => {
+                event.preventDefault();
+                button.classList.remove('active');
+                if (key !== 'Space') {
+                    this.keys[key] = false;
+                }
+            };
+
+            button.addEventListener('pointerdown', press);
+            button.addEventListener('pointerup', release);
+            button.addEventListener('pointercancel', release);
+            button.addEventListener('pointerleave', release);
+        });
     }
     
     handleKeyDown(e) {
-        this.keys[e.key] = true;
-        if (e.key === ' ') {
+        if (e.key.startsWith('Arrow') || e.key === ' ' || e.key === 'Spacebar') {
             e.preventDefault();
+        }
+        this.keys[e.key] = true;
+        if (e.key === 'Spacebar') {
+            this.keys.Space = true;
+        }
+        if (e.key === ' ') {
             this.paused = !this.paused;
         }
     }
     
     handleKeyUp(e) {
         this.keys[e.key] = false;
+        if (e.key === 'Spacebar') {
+            this.keys.Space = false;
+        }
     }
     
     spawnStars() {
@@ -110,18 +171,23 @@ class Game {
     }
     
     updatePlayer() {
-        if (this.keys['ArrowUp'] || this.keys['w'] || this.keys['W']) {
+        const upPressed = this.keys['ArrowUp'] || this.keys['w'] || this.keys['W'] || this.touchState.ArrowUp;
+        const downPressed = this.keys['ArrowDown'] || this.keys['s'] || this.keys['S'] || this.touchState.ArrowDown;
+        const leftPressed = this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A'] || this.touchState.ArrowLeft;
+        const rightPressed = this.keys['ArrowRight'] || this.keys['d'] || this.keys['D'] || this.touchState.ArrowRight;
+
+        if (upPressed) {
             this.player.vy = -this.player.speed;
-        } else if (this.keys['ArrowDown'] || this.keys['s'] || this.keys['S']) {
+        } else if (downPressed) {
             this.player.vy = this.player.speed;
         } else {
             this.player.vy = 0;
         }
         
-        if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) {
+        if (leftPressed) {
             this.player.vx = -this.player.speed;
             this.player.rotation = -0.3;
-        } else if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) {
+        } else if (rightPressed) {
             this.player.vx = this.player.speed;
             this.player.rotation = 0.3;
         } else {
@@ -384,6 +450,14 @@ class Game {
             this.ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
             this.ctx.lineWidth = 3;
             this.ctx.strokeRect(-shakeX, -shakeY, this.canvas.width, this.canvas.height);
+        }
+
+        if (window.innerWidth <= 768) {
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            this.ctx.font = 'bold 16px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'bottom';
+            this.ctx.fillText('Touch arrows below the game', this.canvas.width / 2, this.canvas.height - 12);
         }
         
         this.ctx.restore();
