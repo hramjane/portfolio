@@ -30,6 +30,7 @@ An interactive space-themed game built entirely with vanilla JavaScript and Canv
 ## 🚀 What This Demonstrates
 
 This project shows the power of GitHub Pages:
+
 - ✅ Complex interactive applications
 - ✅ Real-time rendering with Canvas
 - ✅ Full game loop and collision detection
@@ -48,15 +49,18 @@ This project shows the power of GitHub Pages:
 ## 📊 Game Mechanics
 
 ### Scoring System
+
 - Collect stars for points (10 × current level)
 - Higher levels = bigger rewards!
 
 ### Difficulty Progression
+
 - Level 1: 3 asteroids, 3 stars
 - Each level: More stars, faster asteroids
 - Asteroids increase by 0.5× speed per level
 
 ### Game Over
+
 - You start with 3 lives ❤️
 - Hitting an asteroid costs 1 life
 - Game ends when lives reach 0
@@ -65,6 +69,7 @@ This project shows the power of GitHub Pages:
 ## 🔧 Customization
 
 You can easily modify:
+
 - Canvas size: Edit `resizeCanvas()` in `game.js`
 - Colors: Modify `:root` variables in `styles.css`
 - Game speed: Adjust `player.speed` and asteroid spawning
@@ -74,6 +79,7 @@ You can easily modify:
 ## 📱 Browser Compatibility
 
 Works on all modern browsers:
+
 - Chrome/Edge
 - Firefox
 - Safari
@@ -82,6 +88,7 @@ Works on all modern browsers:
 ## 🎓 Learning Resources
 
 This project uses:
+
 - HTML5 Canvas API
 - ES6 Classes
 - Event listeners and keyboard input
