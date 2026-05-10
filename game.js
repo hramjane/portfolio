@@ -129,7 +129,7 @@ class Game {
     }
     
     spawnStars() {
-        const starCount = 3 + this.level;
+        const starCount = this.level <= 2 ? 2 + this.level : 3 + this.level;
         for (let i = 0; i < starCount; i++) {
             this.stars.push({
                 x: Math.random() * (this.canvas.width - 40) + 20,
@@ -142,16 +142,17 @@ class Game {
     }
     
     spawnAsteroids() {
-        const asteroidCount = 3 + Math.floor(this.level * 1.5);
+        const asteroidCount = this.level <= 2 ? 2 : 3 + Math.floor((this.level - 1) * 1.3);
+        const asteroidSpeed = this.level <= 2 ? 1.3 + (this.level * 0.2) : 1.8 + ((this.level - 2) * 0.35);
         for (let i = 0; i < asteroidCount; i++) {
             this.asteroids.push({
                 x: Math.random() * this.canvas.width,
                 y: -50,
                 radius: 15 + Math.random() * 10,
-                speed: 2 + (this.level * 0.5),
+                speed: asteroidSpeed,
                 rotation: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.2,
-                vx: (Math.random() - 0.5) * 2
+                rotationSpeed: (Math.random() - 0.5) * 0.15,
+                vx: (Math.random() - 0.5) * 1.2
             });
         }
     }
@@ -261,7 +262,8 @@ class Game {
             return asteroid.y < this.canvas.height;
         });
         
-        if (this.asteroids.length < 3 + Math.floor(this.level * 1.5)) {
+        const targetAsteroids = this.level <= 2 ? 2 : 3 + Math.floor((this.level - 1) * 1.3);
+        if (this.asteroids.length < targetAsteroids) {
             this.spawnAsteroids();
         }
     }
